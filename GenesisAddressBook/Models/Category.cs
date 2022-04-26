@@ -12,5 +12,6 @@ namespace GenesisAddressBook.Models
         public string? Name { get; set; }
 
         //TODO: Add virtuals
+
     }
 }
