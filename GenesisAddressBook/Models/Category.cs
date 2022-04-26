@@ -12,6 +12,8 @@ namespace GenesisAddressBook.Models
         public string? Name { get; set; }
 
         //TODO: Add virtuals
+        public virtual AppUser? AppUser { get; set; }
+        public virtual ICollection<Contact> Contacts { get; set; } = new HashSet<Contact>();
 
     }
 }
