@@ -31,7 +31,9 @@ namespace GenesisAddressBook.Controllers
         {
             AppUser appUser = await _userManager.GetUserAsync(User);
 
-            List<Contact> contacts = await _context.Contacts.Where(c => c.AppUserId == appUser.Id).ToListAsync();
+            List<Contact> contacts = await _context.Contacts
+                                                   .Where(c => c.AppUserId == appUser.Id)
+                                                   .ToListAsync();
 
             return View(contacts);
         }
@@ -44,7 +46,7 @@ namespace GenesisAddressBook.Controllers
                 return NotFound();
             }
 
-            var contact = await _context.Contacts
+            Contact contact = await _context.Contacts
                 .Include(c => c.AppUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (contact == null)
@@ -56,6 +58,7 @@ namespace GenesisAddressBook.Controllers
         }
 
         // GET: Contacts/Create
+        [Authorize]
         public IActionResult Create()
         {
             //ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id");
@@ -70,17 +73,19 @@ namespace GenesisAddressBook.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,ImageType")] Contact contact)
         {
-            if (ModelState.IsValid)
+            // ModelState.Remove("AppUserId");
+            // AppUserId is null but required when the model comes in
+            if (ModelState.IsValid || contact.AppUserId == null)
             {
                 contact.AppUserId = _userManager.GetUserId(User);
                 contact.Created = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
 
-                if(contact.BirthDate != null)
+                if (contact.BirthDate != null)
                 {
                     contact.BirthDate = DateTime.SpecifyKind(contact.BirthDate.Value, DateTimeKind.Utc);
                 }
 
-                if(contact.ImageFile != null)
+                if (contact.ImageFile != null)
                 {
                     //TODO: Image Service
                 }
@@ -90,11 +95,13 @@ namespace GenesisAddressBook.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contact.AppUserId);
+            // ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contact.AppUserId);
+            ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States)).Cast<States>().ToList());
             return View(contact);
         }
 
         // GET: Contacts/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -102,12 +109,15 @@ namespace GenesisAddressBook.Controllers
                 return NotFound();
             }
 
-            var contact = await _context.Contacts.FindAsync(id);
+            Contact contact = await _context.Contacts.FindAsync(id);
+
             if (contact == null)
             {
                 return NotFound();
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contact.AppUserId);
+
+            // ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contact.AppUserId);
+            ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States)).Cast<States>().ToList());
             return View(contact);
         }
 
@@ -127,6 +137,19 @@ namespace GenesisAddressBook.Controllers
             {
                 try
                 {
+                    // change time back to 
+                    contact.Created = DateTime.SpecifyKind(contact.Created, DateTimeKind.Utc);
+
+                    if (contact.BirthDate != null)
+                    {
+                        contact.BirthDate = DateTime.SpecifyKind(contact.BirthDate.Value, DateTimeKind.Utc);
+                    }
+
+                    if (contact.ImageFile != null)
+                    {
+                        //TODO: Image Service
+                    }
+
                     _context.Update(contact);
                     await _context.SaveChangesAsync();
                 }
@@ -143,7 +166,10 @@ namespace GenesisAddressBook.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contact.AppUserId);
+
+            // generated code ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id", contact.AppUserId);
+            ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States)).Cast<States>().ToList());
+
             return View(contact);
         }
 
@@ -155,7 +181,7 @@ namespace GenesisAddressBook.Controllers
                 return NotFound();
             }
 
-            var contact = await _context.Contacts
+            Contact contact = await _context.Contacts
                 .Include(c => c.AppUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (contact == null)
@@ -171,7 +197,7 @@ namespace GenesisAddressBook.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var contact = await _context.Contacts.FindAsync(id);
+            Contact contact = await _context.Contacts.FindAsync(id);
             _context.Contacts.Remove(contact);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));

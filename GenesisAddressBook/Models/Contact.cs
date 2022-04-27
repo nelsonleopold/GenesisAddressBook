@@ -7,6 +7,8 @@ namespace GenesisAddressBook.Models
     public class Contact
     {
         public int Id { get; set; }
+
+        [Required]
         public string? AppUserId { get; set; }
         [Required]
         [Display(Name = "First Name")]
@@ -38,6 +40,7 @@ namespace GenesisAddressBook.Models
 
         [Required]
         [Display(Name = "Zip Code")]
+        [DataType(DataType.PostalCode)]
         public int ZipCode { get; set; }
 
         [Required]
