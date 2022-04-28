@@ -63,6 +63,7 @@ namespace GenesisAddressBook.Controllers
         {
             //ViewData["AppUserId"] = new SelectList(_context.Users, "Id", "Id");
             ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States)).Cast<States>().ToList());
+            ViewData["CategoryList"] = new MultiSelectList("", "Id", "Name");
             return View();
         }
 
