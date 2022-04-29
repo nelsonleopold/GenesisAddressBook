@@ -1,4 +1,7 @@
 ﻿@model GenesisAddressBook.Models.Contact
+@using GenesisAddressBook.Services.Interfaces
+
+@inject IImageService ImageService
 
 @{
     ViewData["Title"] = "Edit";
@@ -71,6 +74,22 @@
             </div>
 
             @*//TODO add image service*@
+            <div class="form-group">
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" class="form-control" accept=".png,.jpg,.jpeg,.gif"
+                       onchange="document.getElementById('contactImage').src = window.URL.createObjectURL(this.files[0])" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                @if (Model.ImageData != null)
+                {
+                    <img id="contactImage" class="img-fluid img-thumbnail mt-2" style="width:120px;height:120px" src="@ImageService.ConvertByteArrayToFile(Model.ImageData, Model.ImageType)" />
+                }
+                else
+                {
+                     <img id="contactImage" class="img-fluid img-thumbnail mt-2" style="width:120px;height:120px" src="https://cdn.icon-icons.com/icons2/233/PNG/512/Contacts_26253.png" />
+                }                
+            </div>
 
             <div class="form-group">
                 <label asp-for="Categories" class="control-label"></label>
@@ -88,5 +107,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+    await Html.RenderPartialAsync("_ValidationScriptsPartial");
+}
 }

@@ -176,6 +176,8 @@ namespace GenesisAddressBook.Controllers
                     if (contact.ImageFile != null)
                     {
                         //TODO: Image Service
+                        contact.ImageData = await _imageService.ConvertFileToByteArrayAsync(contact.ImageFile);
+                        contact.ImageType = contact.ImageFile.ContentType;
                     }
 
                     _context.Update(contact);

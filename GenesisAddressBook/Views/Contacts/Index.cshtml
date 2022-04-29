@@ -1,4 +1,7 @@
 ﻿@model IEnumerable<GenesisAddressBook.Models.Contact>
+@using GenesisAddressBook.Services.Interfaces
+
+@inject IImageService ImageService
 
 @{
     ViewData["Title"] = "Index";
@@ -49,9 +52,6 @@
                 @Html.DisplayNameFor(model => model.ImageData)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ImageType)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.Categories)
             </th>
             <th></th>
@@ -95,10 +95,14 @@
                     @Html.DisplayFor(modelItem => item.Created)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.ImageData)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.ImageType)
+                    @if(item.ImageData != null)
+                    {
+                        <img style="height: 120px; width:120px" src="@ImageService.ConvertByteArrayToFile(item.ImageData, item.ImageType)" />
+                    } else
+                    {
+                        <img id="contactImage" class="img-fluid img-thumbnail mt-2" style="width:120px;height:120px" src="https://cdn.icon-icons.com/icons2/233/PNG/512/Contacts_26253.png">
+                    }
+
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Categories)

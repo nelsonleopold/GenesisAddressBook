@@ -40,7 +40,7 @@ namespace GenesisAddressBook.Services
         {
             try
             {
-                Contact? contact = await _context.Contacts.Include(c => c.Categories).FirstAsync(c => c.Id == contactId);
+                Contact? contact = await _context.Contacts.Include(c => c.Categories).FirstOrDefaultAsync(c => c.Id == contactId);
                 return contact.Categories;
             }
             catch (Exception)
