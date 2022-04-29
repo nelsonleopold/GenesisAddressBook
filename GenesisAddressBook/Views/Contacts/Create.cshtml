@@ -10,7 +10,7 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
+        <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="FirstName" class="control-label"></label>
@@ -62,13 +62,19 @@
                 <input asp-for="PhoneNumber" class="form-control" />
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
+
             @*//TODO add image service*@
+            <div class="form-group">
+                <label asp-for="ImageFile" class="control-label"></label>
+                <input asp-for="ImageFile" class="form-control" accept=".png,.jpg,.jpeg,.gif"
+                       onchange="document.getElementById('contactImage').src = window.URL.createObjectURL(this.files[0])" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+            </div>
+
 
             <div class="form-group">
                 <label asp-for="Categories" class="control-label"></label>
-                <select asp-for="Categories" asp-items="ViewBag." class="form-control" multiple>
-                    <option>Select Categories</option>
-                </select>
+                <select name="CategoryList" asp-items="ViewBag.CategoryList" class="form-control" multiple></select>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

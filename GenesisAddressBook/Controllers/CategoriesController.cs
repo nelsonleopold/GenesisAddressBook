@@ -25,7 +25,7 @@ namespace GenesisAddressBook.Controllers
         }
 
         // GET: Categories
-        
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             string userId = _userManager.GetUserId(User);
