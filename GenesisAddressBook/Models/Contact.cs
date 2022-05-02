@@ -57,6 +57,7 @@ namespace GenesisAddressBook.Models
 
 
         // Image properties
+        [Display(Name = "User Image")]
         public byte[]? ImageData { get; set; }
         public string? ImageType { get; set; }
         [NotMapped]

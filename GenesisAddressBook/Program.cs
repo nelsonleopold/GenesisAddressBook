@@ -1,4 +1,5 @@
 using GenesisAddressBook.Data;
+using GenesisAddressBook.Helpers;
 using GenesisAddressBook.Models;
 using GenesisAddressBook.Services;
 using GenesisAddressBook.Services.Interfaces;
@@ -8,7 +9,9 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection"); // default connection string
+var connectionString = ConnectionHelper.GetConnectionString(builder.Configuration);
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -19,10 +22,19 @@ builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireCo
 // Custom Services
 builder.Services.AddScoped<IAddressBookService, AddressBookService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<SearchService>();
+builder.Services.AddScoped<IAddressBookEmailSender, BasicEmailService>();
 
-builder.Services.AddControllersWithViews();
+// Custom Email
+builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+
+builder.Services.AddMvc();
 
 var app = builder.Build();
+
+// Data Seeding
+var scope = app.Services.CreateScope();
+await DataHelper.ManageDataAsync(scope.ServiceProvider);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
