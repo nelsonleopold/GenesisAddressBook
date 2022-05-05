@@ -15,5 +15,7 @@ namespace GenesisAddressBook.Services.Interfaces
         Task<ICollection<Category>> GetContactCategoriesAsync(int contactId);
 
         Task RemoveContactFromCategoryAsync(int categoryId, int contactId);
+
+        Task AddContactToDefaultCategory(int categoryId,  int contactId);
     }
 }

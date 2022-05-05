@@ -4,12 +4,14 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Categories</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
+<div class="row mb-5">
+    <div class="col-md-2">
+        <a class="glass-button" asp-action="Create">Create New</a>
+    </div>
+</div>
+<table class="table row glass-cf-style darkGlass p-4">
     <thead>
         <tr>
             <th>
@@ -25,9 +27,9 @@
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a class="me-3" asp-action="Edit" asp-route-id="@item.Id" title="Edit Category"><i class="bg-info bi-pencil text-white"></i></a>
+                <a class="me-3" asp-action="EmailCategory" asp-route-id="@item.Id" title="Send Group Email"><i class="bg-info bi-envelope text-white"></i></a>
+                <a asp-action="Delete" asp-route-id="@item.Id" title="Delete Category"><i class="bg-info bi-trash text-danger"></i></a>
             </td>
         </tr>
 }

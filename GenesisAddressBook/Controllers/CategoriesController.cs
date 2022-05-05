@@ -10,6 +10,8 @@ using GenesisAddressBook.Data;
 using GenesisAddressBook.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
+using GenesisAddressBook.Models.ViewModels;
+using GenesisAddressBook.Services.Interfaces;
 
 namespace GenesisAddressBook.Controllers
 {
@@ -17,11 +19,15 @@ namespace GenesisAddressBook.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IAddressBookEmailSender _emailSender;
 
-        public CategoriesController(ApplicationDbContext context, UserManager<AppUser> userManager)
+        public CategoriesController(ApplicationDbContext context, 
+                                    UserManager<AppUser> userManager, 
+                                    IAddressBookEmailSender emailSender)
         {
             _context = context;
             _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         // GET: Categories
@@ -37,6 +43,51 @@ namespace GenesisAddressBook.Controllers
             // List<Category> categories = await _context.Categories.Where(c => c.AppUserId == appUser.Id).ToListAsync();
             return View(categories);
         }
+
+        // GET: Categories/EmailCategory
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> EmailCategory(int id)
+        {
+            Category category = await _context.Categories.Include(c => c.Contacts)
+                                                         .FirstOrDefaultAsync(c => c.Id == id);
+
+            List<string> emails = category.Contacts.Select(c => c.Email).ToList();
+
+            EmailData emailData = new()
+            {
+                GroupName = category.Name,
+                EmailAddress = String.Join(";", emails),
+                Subject = $"Group Message: - {category.Name}"
+            };
+
+            EmailCategoryViewModel model = new()
+            {
+                Contacts = category.Contacts.ToList(),
+                EmailData = emailData
+            };
+
+            return View(model);
+        }
+
+        // POST: Categories/EmailCategory
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> EmailCategory(EmailData emailData)
+        {
+            if(ModelState.IsValid)
+            {
+                AppUser appUser = await _userManager.GetUserAsync(User);
+                string emailBody = _emailSender.ComposeEmailBody(appUser, emailData);
+
+                await _emailSender.SendEmailAsync(emailData.EmailAddress, emailData.Subject, emailBody);
+
+                return RedirectToAction("Index", "Categories");
+            }
+
+            return View();
+        }
+
 
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)

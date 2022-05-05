@@ -1,6 +1,7 @@
 ﻿using GenesisAddressBook.Data;
 using GenesisAddressBook.Models;
 using GenesisAddressBook.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GenesisAddressBook.Services
@@ -8,10 +9,13 @@ namespace GenesisAddressBook.Services
     public class AddressBookService : IAddressBookService
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<AppUser> _userManager;
 
-        public AddressBookService(ApplicationDbContext context)
+        public AddressBookService(ApplicationDbContext context, 
+                                  UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
         public async Task AddContactToCategoryAsync(int categoryId, int contactId)
         {
@@ -70,7 +74,8 @@ namespace GenesisAddressBook.Services
 
             try
             {
-                categories = await _context.Categories.Where(c => c.AppUserId == userId).ToListAsync();
+                categories = await _context.Categories.Where(c => c.AppUserId == userId)
+                                                      .ToListAsync();
             }
             catch (Exception)
             {
@@ -110,6 +115,33 @@ namespace GenesisAddressBook.Services
                     if (category != null && contact != null)
                     {
                         category.Contacts.Remove(contact);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task AddContactToDefaultCategory(int categoryId, int contactId)
+        {
+            try
+            {
+                if (!await IsContactInCategory(categoryId, contactId))
+                {
+                    Contact? contact = await _context.Contacts.FindAsync(contactId);
+                    Category? category = new();
+                    category.Name = "All";
+                    category.AppUserId = contact.AppUserId;
+                    _context.Add(category);
+
+
+                    if (category != null && contact != null)
+                    {
+                        category.Contacts.Add(contact);
                         await _context.SaveChangesAsync();
                     }
                 }

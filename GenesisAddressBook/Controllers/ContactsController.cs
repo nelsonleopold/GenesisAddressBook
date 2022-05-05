@@ -30,7 +30,7 @@ namespace GenesisAddressBook.Controllers
                                   UserManager<AppUser> userManager,
                                   IAddressBookService addressBookService,
                                   IImageService imageService,
-                                  SearchService searchService, 
+                                  SearchService searchService,
                                   IAddressBookEmailSender emailSender)
         {
             _context = context;
@@ -60,9 +60,9 @@ namespace GenesisAddressBook.Controllers
             {
                 contacts = appUser.Categories.FirstOrDefault(c => c.Id == id).Contacts.ToList();
             }
-                        
+
             ViewData["CategoryId"] = new SelectList(appUser.Categories, "Id", "Name", id);
-            
+
             return View(contacts);
         }
 
@@ -84,7 +84,7 @@ namespace GenesisAddressBook.Controllers
         {
             Contact contact = await _context.Contacts.Include(c => c.Categories)
                                                      .FirstOrDefaultAsync(c => c.Id == id);
-            if(contact == null)
+            if (contact == null)
             {
                 return NotFound();
             }
@@ -111,7 +111,7 @@ namespace GenesisAddressBook.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EmailContact(EmailData emailData)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 AppUser appUser = await _userManager.GetUserAsync(User);
                 string emailBody = _emailSender.ComposeEmailBody(appUser, emailData);
@@ -165,7 +165,7 @@ namespace GenesisAddressBook.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,BirthDate,Address1,Address2,City,State,ZipCode,Email,PhoneNumber,ImageFile")] Contact contact, List<int> categoryList)
         {
-            ModelState.Remove("AppUserId");
+            // ModelState.Remove("AppUserId");
             // AppUserId is null but required when the model comes in
             if (ModelState.IsValid || contact.AppUserId == null)
             {
@@ -184,15 +184,19 @@ namespace GenesisAddressBook.Controllers
                     contact.ImageType = contact.ImageFile.ContentType;
                 }
 
+
+
                 _context.Add(contact);
                 await _context.SaveChangesAsync();
 
                 // Add Contact to Categories
+                
                 foreach (int categoryId in categoryList)
                 {
+                    await _addressBookService.AddContactToDefaultCategory(categoryId, contact.Id);
                     await _addressBookService.AddContactToCategoryAsync(categoryId, contact.Id);
                 }
-                
+
 
                 return RedirectToAction(nameof(Index));
             }
@@ -213,7 +217,7 @@ namespace GenesisAddressBook.Controllers
                 return NotFound();
             }
 
-            Contact contact = await _context.Contacts.FindAsync(id);         
+            Contact contact = await _context.Contacts.FindAsync(id);
 
             if (contact == null)
             {
@@ -270,9 +274,11 @@ namespace GenesisAddressBook.Controllers
                     }
 
                     // Add Contact to Categories
+                    // 
                     foreach (int categoryId in categoryList)
                     {
                         await _addressBookService.AddContactToCategoryAsync(categoryId, contact.Id);
+                        await _addressBookService.AddContactToDefaultCategory(categoryId, contact.Id);
                     }
 
                 }
@@ -289,9 +295,9 @@ namespace GenesisAddressBook.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            
+
             ViewData["StatesList"] = new SelectList(Enum.GetValues(typeof(States)).Cast<States>().ToList());
-            
+
             return View(contact);
         }
 
