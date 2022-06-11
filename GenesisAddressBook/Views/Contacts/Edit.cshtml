@@ -83,7 +83,7 @@
             <div class="form-group">
                 @if (Model.ImageData != null)
                 {
-                    <img id="contactImage" class="img-fluid img-thumbnail mt-2" style="width:120px;height:120px" src="@ImageService.ConvertByteArrayToFile(Model.ImageData, Model.ImageType)" />
+                    <img id="contactImage" class="img-fluid img-thumbnail mt-2" style="width:120px;height:120px" src="@ImageService.ConvertByteArrayToFile(Model.ImageData, Model.ImageType!)" />
                 }
                 else
                 {
